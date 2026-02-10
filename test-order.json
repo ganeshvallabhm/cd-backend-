@@ -1,0 +1,23 @@
+{
+    "customer": {
+        "name": "John Doe",
+        "phone": "9876543210",
+        "address": "123 Main Street, Apartment 4B",
+        "landmark": "Near Central Park",
+        "pincode": "560001",
+        "instructions": "Ring the bell twice"
+    },
+    "items": [
+        {
+            "name": "Chicken Biryani",
+            "price": 250,
+            "quantity": 2
+        },
+        {
+            "name": "Paneer Butter Masala",
+            "price": 180,
+            "quantity": 1
+        }
+    ],
+    "totalAmount": 680
+}
