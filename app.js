@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 
 const orderRoutes = require("./routes/orderRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.get("/", (req, res) => {
 
 // ---- MAIN ROUTES ----
 app.use("/api/orders", orderRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // ---- ERROR HANDLER ----
 app.use((err, req, res, next) => {

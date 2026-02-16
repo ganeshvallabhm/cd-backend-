@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
+const { markOrderPaid } = require("../controllers/orderController");
 
 // CREATE NEW ORDER
 router.post('/', orderController.createOrder);
@@ -19,5 +20,11 @@ router.patch('/:id/status', orderController.updateOrderStatus);
 
 // DELETE ORDER
 router.delete('/:id', orderController.deleteOrder);
+
+// MARK ORDER AS PAID (PAYMENT SUCCESS WEBHOOK)
+router.patch(
+    "/:id/payment-success",
+    markOrderPaid
+);
 
 module.exports = router;

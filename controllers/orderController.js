@@ -1,7 +1,10 @@
 const Order = require("../models/Order");
 const generateOrderNumber = require("../utils/generateOrderNumber");
-const { sendOrderEmail } = require("../services/emailService");
 const mongoose = require("mongoose");
+const {
+    sendCustomerOrderEmail,
+    sendAdminOrderEmail,
+} = require("../services/emailService");
 
 // Helper to handle duplicate key errors with retry
 const createOrderWithRetry = async (orderData, attempts = 0) => {
@@ -37,11 +40,13 @@ exports.createOrder = async (req, res) => {
         // Create order with retry logic for orderNumber uniqueness
         const savedOrder = await createOrderWithRetry(orderData);
 
-        // Send email asynchronously (don't block response)
-        if (savedOrder.customer?.email) {
-            sendOrderEmail(savedOrder).catch(err =>
-                console.warn('Email sending failed:', err.message)
-            );
+        // Send emails to customer and admin
+        try {
+            await sendCustomerOrderEmail(savedOrder);
+            await sendAdminOrderEmail(savedOrder);
+            console.log("Emails sent successfully");
+        } catch (err) {
+            console.log("Email error:", err.message);
         }
 
         res.status(201).json({
@@ -170,5 +175,47 @@ exports.deleteOrder = async (req, res) => {
         res.status(200).json({ success: true, message: "Order deleted successfully" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.markOrderPaid = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const order = await Order.findByIdAndUpdate(
+            id,
+            {
+                paymentStatus: "PAID",
+                status: "PAID",
+            },
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found",
+            });
+        }
+
+        // SEND EMAIL AFTER PAYMENT
+        try {
+            await sendCustomerOrderEmail(order);
+            await sendAdminOrderEmail(order);
+            console.log("Payment emails sent");
+        } catch (err) {
+            console.log("Email error:", err.message);
+        }
+
+        res.json({
+            success: true,
+            data: order,
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message,
+        });
     }
 };
